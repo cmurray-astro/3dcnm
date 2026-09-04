@@ -89,7 +89,8 @@ app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#F5F5F5');
 const camera = new THREE.PerspectiveCamera(45, app.clientWidth / app.clientHeight, 1, 20000);
-camera.position.set(650, 650, 430);
+camera.position.set(860, 860, 700);
+camera.up.set(0, 0, 1);   // z (Galactic north) is "up" -- three.js defaults to y
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.target.set(0, 0, 0);
 orbit.enableDamping = true;
@@ -143,11 +144,34 @@ for (const sp of SPOKES) {
   scene.add(new THREE.Line(g, refMat));
 }
 const axMat = new THREE.LineBasicMaterial({ color: 0xbbbbbb });
-for (const [dx, dy, dz] of [[480,0,0],[0,480,0],[0,0,360]]) {
+for (const [dx, dy, dz] of [[480,0,0],[0,480,0]]) {
   const g = new THREE.BufferGeometry().setFromPoints(
     [new THREE.Vector3(0,0,0), new THREE.Vector3(dx,dy,dz)]);
   scene.add(new THREE.Line(g, axMat));
 }
+// full Galactic N-S (z) reference axis, labelled NGP / SGP
+{
+  const g = new THREE.BufferGeometry().setFromPoints(
+    [new THREE.Vector3(0, 0, -460), new THREE.Vector3(0, 0, 460)]);
+  scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x888888 })));
+}
+function makeLabel(text) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 96;
+  const ctx = cv.getContext('2d');
+  ctx.font = '700 56px -apple-system, Helvetica, Arial, sans-serif';
+  ctx.fillStyle = '#333333';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 128, 52);
+  const tex = new THREE.CanvasTexture(cv);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, depthTest: false, transparent: true }));
+  spr.scale.set(70, 26, 1);
+  spr.renderOrder = 999;
+  return spr;
+}
+const ngpLabel = makeLabel('NGP'); ngpLabel.position.set(0, 0, 495); scene.add(ngpLabel);
+const sgpLabel = makeLabel('SGP'); sgpLabel.position.set(0, 0, -495); scene.add(sgpLabel);
 
 // attribute switching
 const cache = {};
