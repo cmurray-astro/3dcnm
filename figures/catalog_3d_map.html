@@ -19,16 +19,16 @@
   #hint { position:absolute; bottom:10px; left:12px; font-size:11px; color:#888; }
   #legendstack { position:absolute; bottom:26px; right:16px; z-index:10;
     display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
-  #colorbar { background:#ffffffe0; border:1px solid #dcdcdc; border-radius:6px;
-    padding:10px 14px 9px; box-shadow:0 1px 4px #0002; }
+  .halo { text-shadow: -1px -1px 0 #F5F5F5, 1px -1px 0 #F5F5F5, -1px 1px 0 #F5F5F5, 1px 1px 0 #F5F5F5,
+    0 0 6px #F5F5F5, 0 0 6px #F5F5F5; }
+  #colorbar { padding:4px 2px; }
   #cbcanvas { width:320px; height:20px; display:block; border:1px solid #999; border-radius:2px; }
   #cbticks { position:relative; width:320px; height:20px; font-size:13px; color:#333; margin-top:2px; }
   #cbticks span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
-  #cblabel { font-size:14px; font-weight:600; color:#222; margin-top:4px; }
-  #scalebar { text-align:center; font-size:16px; font-weight:600; color:#222; user-select:none;
-    background:#ffffffe0; padding:7px 16px 6px; border-radius:6px; border:1px solid #dcdcdc;
-    box-shadow:0 1px 4px #0002; }
-  #scalebar .bar { height:5px; background:#222; margin:0 auto 5px; min-width:20px; border-radius:1px; }
+  #cblabel { font-size:14px; font-weight:400; color:#222; margin-top:4px; }
+  #scalebar { text-align:center; font-size:16px; font-weight:400; color:#222; user-select:none;
+    padding:4px 2px; }
+  #scalebar .bar { height:3px; background:#222; margin:0 auto 5px; min-width:20px; border-radius:1px; }
 </style>
 </head>
 <body>
@@ -47,11 +47,11 @@
 </div>
 <div id="app"></div>
 <div id="legendstack">
-  <div id="scalebar"><div class="bar" id="sbbar"></div><span id="sblabel">100 pc</span></div>
+  <div id="scalebar" class="halo"><div class="bar" id="sbbar"></div><span id="sblabel">100 pc</span></div>
   <div id="colorbar">
     <canvas id="cbcanvas" width="320" height="20"></canvas>
-    <div id="cbticks"></div>
-    <div id="cblabel"></div>
+    <div id="cbticks" class="halo"></div>
+    <div id="cblabel" class="halo"></div>
   </div>
 </div>
 <div id="hint">drag to rotate · scroll to zoom · right-drag to pan</div>
