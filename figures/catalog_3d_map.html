@@ -241,7 +241,12 @@ if (qp.has('dist')) {
   camera.position.multiplyScalar(+qp.get('dist'));
 }
 if (qp.has('print')) {
-  for (const id of ['hint', 'attrrow', 'psrow']) document.getElementById(id).style.display = 'none';
+  // hides the whole top-left info/controls panel (title, subtitle, colour
+  // dropdown, point-size slider) and the rotate hint -- for the paper
+  // figure the caption already carries that context, and CM asked for the
+  // panel gone from the static image entirely. Colorbar and scale bar are
+  // separate floating elements (not inside #panel) and stay.
+  for (const id of ['hint', 'panel']) document.getElementById(id).style.display = 'none';
 }
 
 addEventListener('resize', () => {
