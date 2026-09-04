@@ -19,7 +19,13 @@
   #cbticks { position:relative; width:240px; height:14px; font-size:10px; color:#444; }
   #cbticks span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
   #cblabel { font-size:11px; color:#333; margin-top:2px; }
+  #psrow { margin-top:12px; font-size:12px; color:#333; display:flex; align-items:center; gap:8px; }
+  #psrow input[type=range] { flex:1; accent-color:#0072B2; }
   #hint { position:absolute; bottom:10px; left:12px; font-size:11px; color:#888; }
+  #scalebar { position:absolute; bottom:30px; right:16px; z-index:10; text-align:center;
+    font-size:11px; color:#222; user-select:none; background:#ffffffd0;
+    padding:4px 9px 3px; border-radius:4px; }
+  #scalebar .bar { height:3px; background:#222; margin:0 auto 3px; min-width:20px; }
 </style>
 </head>
 <body>
@@ -35,12 +41,14 @@
     <div id="cbticks"></div>
     <div id="cblabel"></div>
   </div>
-  <label style="display:block;margin-top:8px;font-size:11px;color:#444">
-    Point size <input type="range" id="psize" min="1" max="9" step="0.5" value="2.5"
-      style="vertical-align:middle;width:120px">
-  </label>
+  <div id="psrow">
+    <span>Point size</span>
+    <input type="range" id="psize" min="1" max="9" step="0.5" value="2.5">
+    <span id="psval">2.5</span>
+  </div>
 </div>
 <div id="app"></div>
+<div id="scalebar"><div class="bar" id="sbbar"></div><span id="sblabel">100 pc</span></div>
 <div id="hint">drag to rotate · scroll to zoom · right-drag to pan</div>
 
 <script type="importmap">
@@ -180,7 +188,8 @@ sel.onchange = () => setAttr(+sel.value);
 setAttr(0);
 
 const psize = document.getElementById('psize');
-psize.oninput = () => { mat.uniforms.uSize.value = +psize.value; };
+const psval = document.getElementById('psval');
+psize.oninput = () => { mat.uniforms.uSize.value = +psize.value; psval.textContent = psize.value; };
 
 addEventListener('resize', () => {
   camera.aspect = app.clientWidth / app.clientHeight;
@@ -188,9 +197,29 @@ addEventListener('resize', () => {
   renderer.setSize(app.clientWidth, app.clientHeight);
 });
 
+// dynamic scale bar: pixels-per-pc at the orbit target, snapped to 1/2/5·10^n
+const sbbar = document.getElementById('sbbar');
+const sblabel = document.getElementById('sblabel');
+const _p0 = new THREE.Vector3(), _p1 = new THREE.Vector3(), _right = new THREE.Vector3();
+function updateScaleBar() {
+  _right.setFromMatrixColumn(camera.matrixWorld, 0);        // camera +x (right)
+  _p0.copy(orbit.target);
+  _p1.copy(orbit.target).addScaledVector(_right, 100);      // 100 pc to the right
+  _p0.project(camera); _p1.project(camera);
+  const pxPerPc = Math.abs(_p1.x - _p0.x) * 0.5 * app.clientWidth / 100;
+  if (!isFinite(pxPerPc) || pxPerPc <= 0) return;
+  let L = 100;
+  const target = 90 / pxPerPc;                              // aim for ~90 px
+  const mag = Math.pow(10, Math.floor(Math.log10(target)));
+  for (const m of [1, 2, 5, 10]) { L = m * mag; if (L >= target) break; }
+  sbbar.style.width = (L * pxPerPc).toFixed(0) + 'px';
+  sblabel.textContent = (L >= 1000 ? (L/1000) + ' kpc' : L + ' pc');
+}
+
 (function loop() {
   requestAnimationFrame(loop);
   orbit.update();
+  updateScaleBar();
   renderer.render(scene, camera);
 })();
 </script>
