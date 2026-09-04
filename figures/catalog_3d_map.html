@@ -14,18 +14,19 @@
   #panel h1 { font-size:13px; margin:0 0 6px; font-weight:600; }
   #panel .sub { color:#666; font-size:11px; margin:2px 0 8px; line-height:1.35; }
   select { font-size:13px; padding:3px 6px; width:100%; margin-top:3px; }
-  #cb { margin-top:10px; }
-  #cbcanvas { width:240px; height:12px; display:block; border:1px solid #ccc; }
-  #cbticks { position:relative; width:240px; height:14px; font-size:10px; color:#444; }
-  #cbticks span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
-  #cblabel { font-size:11px; color:#333; margin-top:2px; }
   #psrow { margin-top:12px; font-size:12px; color:#333; display:flex; align-items:center; gap:8px; }
   #psrow input[type=range] { flex:1; accent-color:#0072B2; }
   #hint { position:absolute; bottom:10px; left:12px; font-size:11px; color:#888; }
+  #colorbar { position:absolute; bottom:26px; left:16px; z-index:10; background:#ffffffe0;
+    border:1px solid #dcdcdc; border-radius:6px; padding:10px 14px 9px; box-shadow:0 1px 4px #0002; }
+  #cbcanvas { width:320px; height:20px; display:block; border:1px solid #999; border-radius:2px; }
+  #cbticks { position:relative; width:320px; height:20px; font-size:13px; color:#333; margin-top:2px; }
+  #cbticks span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
+  #cblabel { font-size:14px; font-weight:600; color:#222; margin-top:4px; }
   #scalebar { position:absolute; bottom:30px; right:16px; z-index:10; text-align:center;
-    font-size:11px; color:#222; user-select:none; background:#ffffffd0;
-    padding:4px 9px 3px; border-radius:4px; }
-  #scalebar .bar { height:3px; background:#222; margin:0 auto 3px; min-width:20px; }
+    font-size:16px; font-weight:600; color:#222; user-select:none; background:#ffffffe0;
+    padding:7px 16px 6px; border-radius:6px; border:1px solid #dcdcdc; box-shadow:0 1px 4px #0002; }
+  #scalebar .bar { height:5px; background:#222; margin:0 auto 5px; min-width:20px; border-radius:1px; }
 </style>
 </head>
 <body>
@@ -36,11 +37,6 @@
   x→<i>l</i>=0, y→<i>l</i>=90, z→NGP</div>
   <div id="attrrow">Colour by:
   <select id="attr"></select></div>
-  <div id="cb">
-    <canvas id="cbcanvas" width="240" height="12"></canvas>
-    <div id="cbticks"></div>
-    <div id="cblabel"></div>
-  </div>
   <div id="psrow">
     <span>Point size</span>
     <input type="range" id="psize" min="1" max="9" step="0.5" value="2.5">
@@ -48,6 +44,11 @@
   </div>
 </div>
 <div id="app"></div>
+<div id="colorbar">
+  <canvas id="cbcanvas" width="320" height="20"></canvas>
+  <div id="cbticks"></div>
+  <div id="cblabel"></div>
+</div>
 <div id="scalebar"><div class="bar" id="sbbar"></div><span id="sblabel">100 pc</span></div>
 <div id="hint">drag to rotate · scroll to zoom · right-drag to pan</div>
 
@@ -192,17 +193,18 @@ function setAttr(k) {
   geom.attributes.aVal.needsUpdate = true;
   mat.uniforms.uLUT.value = cache[k].tex;
 
-  const img = cbctx.createImageData(240, 1);
-  for (let px = 0; px < 240; px++) {
-    const j = Math.round(px / 239 * 255);
+  const CBW = cbcanvas.width, CBH = cbcanvas.height;
+  const img = cbctx.createImageData(CBW, 1);
+  for (let px = 0; px < CBW; px++) {
+    const j = Math.round(px / (CBW - 1) * 255);
     img.data[4*px] = cache[k].lut[3*j];
     img.data[4*px+1] = cache[k].lut[3*j+1];
     img.data[4*px+2] = cache[k].lut[3*j+2];
     img.data[4*px+3] = 255;
   }
-  for (let row = 0; row < 12; row++) cbctx.putImageData(img, 0, row);
+  for (let row = 0; row < CBH; row++) cbctx.putImageData(img, 0, row);
   cbticks.innerHTML = a.tickpos.map((p, i) =>
-    `<span style="left:${p*240}px">${a.ticktext[i]}</span>`).join('');
+    `<span style="left:${p*CBW}px">${a.ticktext[i]}</span>`).join('');
   cblabel.textContent = a.label;
 }
 
@@ -214,6 +216,7 @@ sel.onchange = () => setAttr(+sel.value);
 //   ?attr=<index>   initial colour attribute (default 0 = distance)
 //   ?print          hide the interactive controls, keep colorbar/scalebar
 //   ?dist=<factor>  scale the default camera distance (e.g. 0.6 = zoom in)
+//   ?rot=<degrees>  rotate the default camera azimuthally about z first
 //   ?psize=<n>      initial point size
 const qp = new URLSearchParams(location.search);
 const initAttr = qp.has('attr') ? +qp.get('attr') : 0;
@@ -227,6 +230,12 @@ if (qp.has('psize')) {
   psize.value = qp.get('psize');
   mat.uniforms.uSize.value = +psize.value;
   psval.textContent = psize.value;
+}
+if (qp.has('rot')) {
+  const rad = +qp.get('rot') * Math.PI / 180;
+  const cx = camera.position.x, cy = camera.position.y;
+  camera.position.x = cx * Math.cos(rad) - cy * Math.sin(rad);
+  camera.position.y = cx * Math.sin(rad) + cy * Math.cos(rad);
 }
 if (qp.has('dist')) {
   camera.position.multiplyScalar(+qp.get('dist'));
