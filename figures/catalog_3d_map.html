@@ -34,8 +34,8 @@
   <div class="sub">955,629 sightlines · N<sub>CNM</sub>=1 / N<sub>dust</sub>=1<br>
   Sun at origin · rings at 100–400&nbsp;pc in the <i>b</i>=0 plane<br>
   x→<i>l</i>=0, y→<i>l</i>=90, z→NGP</div>
-  Colour by:
-  <select id="attr"></select>
+  <div id="attrrow">Colour by:
+  <select id="attr"></select></div>
   <div id="cb">
     <canvas id="cbcanvas" width="240" height="12"></canvas>
     <div id="cbticks"></div>
@@ -209,11 +209,31 @@ function setAttr(k) {
 const sel = document.getElementById('attr');
 ATTRS.forEach((a, i) => sel.add(new Option(a.label, i)));
 sel.onchange = () => setAttr(+sel.value);
-setAttr(0);
+
+// URL params for reproducible screenshots (e.g. the static paper figure):
+//   ?attr=<index>   initial colour attribute (default 0 = distance)
+//   ?print          hide the interactive controls, keep colorbar/scalebar
+//   ?dist=<factor>  scale the default camera distance (e.g. 0.6 = zoom in)
+//   ?psize=<n>      initial point size
+const qp = new URLSearchParams(location.search);
+const initAttr = qp.has('attr') ? +qp.get('attr') : 0;
+setAttr(initAttr);
+sel.value = initAttr;
 
 const psize = document.getElementById('psize');
 const psval = document.getElementById('psval');
 psize.oninput = () => { mat.uniforms.uSize.value = +psize.value; psval.textContent = psize.value; };
+if (qp.has('psize')) {
+  psize.value = qp.get('psize');
+  mat.uniforms.uSize.value = +psize.value;
+  psval.textContent = psize.value;
+}
+if (qp.has('dist')) {
+  camera.position.multiplyScalar(+qp.get('dist'));
+}
+if (qp.has('print')) {
+  for (const id of ['hint', 'attrrow', 'psrow']) document.getElementById(id).style.display = 'none';
+}
 
 addEventListener('resize', () => {
   camera.aspect = app.clientWidth / app.clientHeight;
