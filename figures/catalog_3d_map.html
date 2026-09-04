@@ -17,15 +17,12 @@
   #psrow { margin-top:12px; font-size:12px; color:#333; display:flex; align-items:center; gap:8px; }
   #psrow input[type=range] { flex:1; accent-color:#0072B2; }
   #hint { position:absolute; bottom:10px; left:12px; font-size:11px; color:#888; }
-  #colorbar { position:absolute; top:16px; right:16px; z-index:10; background:#ffffffe0;
-    border:1px solid #dcdcdc; border-radius:6px; padding:10px 12px 12px; box-shadow:0 1px 4px #0002;
-    width:150px; text-align:center; }
-  #cblabel { font-size:14px; font-weight:600; color:#222; margin-bottom:8px; }
-  #cbrow { display:flex; justify-content:center; gap:6px; }
-  #cbcanvas { width:22px; height:220px; display:block; border:1px solid #999; border-radius:2px;
-    flex:none; }
-  #cbticks { position:relative; width:60px; height:220px; font-size:13px; color:#333; text-align:left; }
-  #cbticks span { position:absolute; left:4px; transform:translateY(-50%); white-space:nowrap; }
+  #colorbar { position:absolute; bottom:26px; left:38%; z-index:10; background:#ffffffe0;
+    border:1px solid #dcdcdc; border-radius:6px; padding:10px 14px 9px; box-shadow:0 1px 4px #0002; }
+  #cbcanvas { width:320px; height:20px; display:block; border:1px solid #999; border-radius:2px; }
+  #cbticks { position:relative; width:320px; height:20px; font-size:13px; color:#333; margin-top:2px; }
+  #cbticks span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
+  #cblabel { font-size:14px; font-weight:600; color:#222; margin-top:4px; }
   #scalebar { position:absolute; bottom:30px; right:16px; z-index:10; text-align:center;
     font-size:16px; font-weight:600; color:#222; user-select:none; background:#ffffffe0;
     padding:7px 16px 6px; border-radius:6px; border:1px solid #dcdcdc; box-shadow:0 1px 4px #0002; }
@@ -48,11 +45,9 @@
 </div>
 <div id="app"></div>
 <div id="colorbar">
+  <canvas id="cbcanvas" width="320" height="20"></canvas>
+  <div id="cbticks"></div>
   <div id="cblabel"></div>
-  <div id="cbrow">
-    <canvas id="cbcanvas" width="22" height="220"></canvas>
-    <div id="cbticks"></div>
-  </div>
 </div>
 <div id="scalebar"><div class="bar" id="sbbar"></div><span id="sblabel">100 pc</span></div>
 <div id="hint">drag to rotate · scroll to zoom · right-drag to pan</div>
@@ -198,21 +193,18 @@ function setAttr(k) {
   geom.attributes.aVal.needsUpdate = true;
   mat.uniforms.uLUT.value = cache[k].tex;
 
-  // vertical bar: high value at top (py=0), low at bottom -- standard
-  // colorbar convention, and keeps the panel narrow (CM: reposition so
-  // the colorbar doesn't add horizontal extent to the figure)
   const CBW = cbcanvas.width, CBH = cbcanvas.height;
-  const img = cbctx.createImageData(1, CBH);
-  for (let py = 0; py < CBH; py++) {
-    const j = Math.round((1 - py / (CBH - 1)) * 255);
-    img.data[4*py] = cache[k].lut[3*j];
-    img.data[4*py+1] = cache[k].lut[3*j+1];
-    img.data[4*py+2] = cache[k].lut[3*j+2];
-    img.data[4*py+3] = 255;
+  const img = cbctx.createImageData(CBW, 1);
+  for (let px = 0; px < CBW; px++) {
+    const j = Math.round(px / (CBW - 1) * 255);
+    img.data[4*px] = cache[k].lut[3*j];
+    img.data[4*px+1] = cache[k].lut[3*j+1];
+    img.data[4*px+2] = cache[k].lut[3*j+2];
+    img.data[4*px+3] = 255;
   }
-  for (let col = 0; col < CBW; col++) cbctx.putImageData(img, col, 0);
+  for (let row = 0; row < CBH; row++) cbctx.putImageData(img, 0, row);
   cbticks.innerHTML = a.tickpos.map((p, i) =>
-    `<span style="top:${(1 - p) * CBH}px">${a.ticktext[i]}</span>`).join('');
+    `<span style="left:${p*CBW}px">${a.ticktext[i]}</span>`).join('');
   cblabel.innerHTML = a.label_html;
 }
 
