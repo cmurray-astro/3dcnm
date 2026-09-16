@@ -49,27 +49,11 @@
         <div class="desc">Full native-resolution (NSIDE=1024, 955,629 sightlines) point cloud with a dropdown to colour the points by any catalog quantity: distance, peculiar velocity, T<sub>B,CNM</sub>, line width, N(HI)<sub>CNM</sub>, (dA<sub>V</sub>/dd)<sub>peak</sub>, cloud depth, or A<sub>V,CNM</sub>.</div>
       </li>
       <li>
-        <a href="figures/distance_3d_map.html">Distance map (clean N_CNM=1 / N_dust=1 catalog)</a>
-        <div class="desc">Full native-resolution (NSIDE=1024) point cloud, colored by distance from the Sun.</div>
-      </li>
-      <li>
-        <a href="figures/vpec_3d_map.html">Peculiar velocity map (expanded sample)</a>
-        <div class="desc">HEALPix NSIDE=256 binned map from the expanded (CNM-matched) sample, colored by v_pec (km/s).</div>
-      </li>
-      <li>
-        <a href="figures/vpec_3d_map_animated.html">Peculiar velocity map, animated</a>
-        <div class="desc">Same sample, with points ballistically extrapolated &plusmn;15 Myr along their own sightline direction at their v_pec. Play/reset controls included.</div>
-      </li>
-      <li>
-        <a href="figures/bubble_vpec_3d_map.html">Local Bubble model, colored by v_pec</a>
-        <div class="desc">Full O'Neill+2024 Local Bubble shell model (all 786,432 HEALPix Nside=256 shell elements, gray), with the subset matched to the expanded CNM catalog overlaid and colored by mean v_pec (km/s, &plusmn;10 km/s range).</div>
-      </li>
-      <li>
-        <a href="figures/ccsn_plausible_drivers_3d_map.html">Plausible ccSN drivers, 3D density cloud</a>
-        <div class="desc">Full O'Neill+2024 Local Bubble shell model (gray, for context) with a smoothed volumetric density cloud of reconstructed core-collapse supernovae (Swiggum et al. 2026) selected as plausible <em>current</em> drivers of the shell: dynamically active (age less than the single-remnant Sedov-Taylor stall time) and within that remnant's own current reach of the nearest shell segment (n<sub>0</sub>=0.3 cm<sup>-3</sup>). N=4,573 events, median age 6.0 Myr. See the paper's flat X&ndash;Y version of this figure for the 2D projection and accompanying statistical test.</div>
+        <a href="figures/ccsn_plausible_drivers_3d_map.html">Catalog explorer + plausible ccSN drivers (expanded)</a>
+        <div class="desc">Same explorer, full native-resolution expanded catalog (N_CNM=1, N_dust&le;2, BFS-matched), with a toggleable overlay: reconstructed core-collapse supernovae (Swiggum et al. 2026) selected as plausible <em>current</em> drivers of the Local Bubble shell -- dynamically active (age less than the single-remnant Sedov-Taylor stall time) and within that remnant's own current reach of the nearest shell segment (n<sub>0</sub>=0.3&nbsp;cm<sup>-3</sup>). N=4,573 events, median age 6.0 Myr, colour and size both driven by local source density (checkbox to hide). See the paper's flat X&ndash;Y version of this figure for the 2D projection and accompanying statistical test.</div>
       </li>
     </ul>
   </div>
-  <footer>Generated with k3d and plotly.</footer>
+  <footer>Generated with three.js.</footer>
 </body>
 </html>
